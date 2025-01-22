@@ -1,0 +1,9 @@
+spring:
+  kafka:
+    bootstrap-servers: kafka-controller-headless.kafka.svc.cluster.local:9092
+    consumer:
+      group-id: board-api
+      auto-offset-reset: earliest
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
