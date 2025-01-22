@@ -5,6 +5,6 @@ import kr.co.kwt.board.common.exception.ErrorCode;
 
 public class CommentNotFoundException extends BusinessException {
     public CommentNotFoundException(Long commentId) {
-        super(ErrorCode.COMMENT_NOT_FOUND, String.format("Comment not found with id: %d", commentId));
+        super(ErrorCode.COMMENT_NOT_FOUND, String.format(ErrorCode.COMMENT_NOT_FOUND.getMessage() + " id: %d", commentId));
     }
 }

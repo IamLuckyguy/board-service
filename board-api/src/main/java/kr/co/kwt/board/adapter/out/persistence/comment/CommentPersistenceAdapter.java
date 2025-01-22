@@ -62,6 +62,11 @@ class CommentPersistenceAdapter implements SaveCommentPort, LoadCommentPort, Del
     }
 
     @Override
+    public int countActiveCommentsByPostId(Long postId) {
+        return commentRepository.countActiveCommentsByPostId(postId);
+    }
+
+    @Override
     public void delete(Long commentId) {
         commentRepository.deleteById(commentId);
     }

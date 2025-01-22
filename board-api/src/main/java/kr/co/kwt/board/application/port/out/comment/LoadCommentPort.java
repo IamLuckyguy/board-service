@@ -13,4 +13,5 @@ public interface LoadCommentPort {
     List<Comment> findByParentId(Long id);
     Page<Comment> findParentCommentsByPostId(Long postId, Pageable pageable);
     List<Comment> findByParentIdIn(List<Long> parentIds);
+    int countActiveCommentsByPostId(Long postId);
 }

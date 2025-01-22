@@ -5,7 +5,9 @@ import kr.co.kwt.board.domain.event.DomainEvent;
 import kr.co.kwt.board.domain.event.post.PostCreatedEvent;
 import kr.co.kwt.board.domain.event.post.PostDeletedEvent;
 import kr.co.kwt.board.domain.event.post.PostUpdatedEvent;
+import kr.co.kwt.board.domain.post.exception.PostCannotBeDeletedException;
 import kr.co.kwt.board.domain.post.exception.PostCannotBePublishedException;
+import kr.co.kwt.board.domain.post.exception.PostCannotBeUpdatedException;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -32,7 +34,7 @@ public class Post {
     private LocalDateTime deletedAt;
     private final Long createdBy;
     private Long updatedBy;
-    private final List<DomainEvent> domainEvents;  // DomainEvent 추상 클래스를 만들면 Object 대신 사용
+    private final List<DomainEvent> domainEvents;
 
     @Builder
     public Post(Long id, Long serviceId, Long authorId, String title, String content,
@@ -89,6 +91,16 @@ public class Post {
         this.viewCount++;
     }
 
+    public void incrementCommentCount() {
+        this.commentCount++;
+    }
+
+    public void decrementCommentCount() {
+        if (this.commentCount > 0) {
+            this.commentCount--;
+        }
+    }
+
     public void updateLikeCount(int likeCount) {
         if (isDeleted()) {
             throw new IllegalStateException("Cannot update like count of deleted post");
@@ -101,12 +113,17 @@ public class Post {
 
     private void validateCanBePublished() {
         if (isDeleted()) {
-            throw new PostCannotBePublishedException(ErrorCode.POST_NOT_FOUND, this.id);
+            throw new PostCannotBePublishedException(
+                    ErrorCode.POST_NOT_FOUND,
+                    String.format(ErrorCode.POST_NOT_FOUND.getMessage() + " : %d", this.id)
+            );
         }
 
         if (this.status != PostStatus.DRAFT && this.status != PostStatus.SCHEDULED) {
             throw new PostCannotBePublishedException(
-                    String.format("'%s' 상태의 게시물은 발행할 수 없습니다.", this.status));
+                    ErrorCode.POST_STATUS_CHANGE_NOT_ALLOWED,
+                    String.format(ErrorCode.POST_STATUS_CHANGE_NOT_ALLOWED.getMessage() + " : %s", this.status)
+            );
         }
 
         if (this.postContent.getTitle() == null || this.postContent.getTitle().trim().isEmpty()) {
@@ -120,13 +137,16 @@ public class Post {
 
     private void validateCanBeUpdated() {
         if (isDeleted()) {
-            throw new PostCannotBeUpdatedException("삭제된 게시물은 수정할 수 없습니다.");
+            throw new PostCannotBeUpdatedException(
+                    ErrorCode.POST_NOT_FOUND,
+                    String.format(ErrorCode.POST_NOT_FOUND.getMessage() + " : %d", this.id)
+            );
         }
     }
 
     private void validateCanBeDeleted() {
         if (isDeleted()) {
-            throw new PostAlreadyDeletedException("이미 삭제된 게시물입니다.");
+            throw new PostCannotBeDeletedException("이미 삭제된 게시물입니다.");
         }
     }
 
@@ -144,7 +164,10 @@ public class Post {
 
     public void schedule(LocalDateTime scheduledAt) {
         if (this.status != PostStatus.DRAFT) {
-            throw new IllegalStateException("Cannot schedule post in " + this.status + " status");
+            throw new PostCannotBePublishedException(
+                    ErrorCode.POST_STATUS_CHANGE_NOT_ALLOWED,
+                    String.format(ErrorCode.POST_STATUS_CHANGE_NOT_ALLOWED.getMessage() + " : %s", this.status)
+            );
         }
         this.status = PostStatus.SCHEDULED;
         this.scheduledAt = scheduledAt;
@@ -152,5 +175,12 @@ public class Post {
 
     public void updatePinnedStatus(boolean pinned) {
         this.isPinned = pinned;
+    }
+
+    public void syncCommentCount(int actualCommentCount) {
+        if (this.commentCount != actualCommentCount) {
+            this.commentCount = actualCommentCount;
+//            domainEvents.add(new CommentCountSyncedEvent(this));  // 필요한 경우
+        }
     }
 }

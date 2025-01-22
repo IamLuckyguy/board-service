@@ -34,6 +34,14 @@ class PostPersistenceAdapter implements LoadPostPort, SavePostPort {
     }
 
     @Override
+    public List<Post> loadAll() {
+        return postRepository.findAll()
+                .stream()
+                .map(postMapper::mapToDomainEntity)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<Post> findAllByCondition(
             Long serviceId,
             PostType postType,

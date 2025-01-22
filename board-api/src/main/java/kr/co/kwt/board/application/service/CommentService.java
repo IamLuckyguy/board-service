@@ -8,8 +8,12 @@ import kr.co.kwt.board.application.port.out.comment.DeleteCommentPort;
 import kr.co.kwt.board.application.port.out.comment.LoadCommentPort;
 import kr.co.kwt.board.application.port.out.comment.SaveCommentPort;
 import kr.co.kwt.board.application.port.in.comment.UpdateCommentUseCase;
+import kr.co.kwt.board.application.port.out.post.LoadPostPort;
+import kr.co.kwt.board.application.port.out.post.SavePostPort;
 import kr.co.kwt.board.domain.comment.Comment;
+import kr.co.kwt.board.domain.post.Post;
 import kr.co.kwt.board.domain.comment.exception.CommentNotFoundException;
+import kr.co.kwt.board.domain.post.exception.PostNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -35,11 +39,17 @@ public class CommentService implements
     private final LoadCommentPort loadCommentPort;
     private final SaveCommentPort saveCommentPort;
     private final DeleteCommentPort deleteCommentPort;
+    private final LoadPostPort loadPostPort;
+    private final SavePostPort savePostPort;
     private final AuthorService authorService;
 
     @Override
     @Transactional
     public Long createComment(CreateCommentCommand command) {
+        // 게시물 존재 여부 확인
+        Post post = loadPostPort.findById(command.getPostId())
+                .orElseThrow(() -> new PostNotFoundException(command.getPostId()));
+
         Comment comment = Comment.builder()
                 .postId(command.getPostId())
                 .parentId(command.getParentId())
@@ -49,6 +59,11 @@ public class CommentService implements
         ).build();
 
         Comment savedComment = saveCommentPort.save(comment);
+
+        // 게시물의 댓글 수 증가
+        post.incrementCommentCount();
+        savePostPort.save(post);
+
         return savedComment.getId();
     }
 
@@ -68,8 +83,31 @@ public class CommentService implements
         Comment comment = loadCommentPort.findById(command.getCommentId())
                 .orElseThrow(() -> new CommentNotFoundException(command.getCommentId()));
 
-        comment.delete(command.getDeletedBy());
-        saveCommentPort.save(comment);
+        // 게시물 조회
+        Post post = loadPostPort.findById(comment.getPostId())
+                .orElseThrow(() -> new PostNotFoundException(comment.getPostId()));
+
+        // 댓글이 이미 삭제되었는지 확인
+        if (!comment.isDeleted()) {
+            comment.delete(command.getDeletedBy());
+            saveCommentPort.save(comment);
+
+            // 연관된 답글들도 삭제
+            List<Comment> replies = loadCommentPort.findByParentId(comment.getId());
+            for (Comment reply : replies) {
+                if (!reply.isDeleted()) {
+                    reply.delete(command.getDeletedBy());
+                    saveCommentPort.save(reply);
+
+                    // 답글당 게시물의 댓글 수 감소
+                    post.decrementCommentCount();
+                }
+            }
+
+            // 원댓글에 대한 게시물의 댓글 수 감소
+            post.decrementCommentCount();
+            savePostPort.save(post);
+        }
     }
 
     @Override
