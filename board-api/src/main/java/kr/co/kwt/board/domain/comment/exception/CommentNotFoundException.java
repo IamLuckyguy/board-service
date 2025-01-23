@@ -1,10 +1,9 @@
 package kr.co.kwt.board.domain.comment.exception;
 
-import kr.co.kwt.board.common.exception.BusinessException;
-import kr.co.kwt.board.common.exception.ErrorCode;
+import kr.co.kwt.board.common.exception.ResourceNotFoundException;
 
-public class CommentNotFoundException extends BusinessException {
-    public CommentNotFoundException(Long commentId) {
-        super(ErrorCode.COMMENT_NOT_FOUND, String.format(ErrorCode.COMMENT_NOT_FOUND.getMessage() + " id: %d", commentId));
+public class CommentNotFoundException extends ResourceNotFoundException {
+    public CommentNotFoundException(Long id) {
+        super("Comment", "id", id);
     }
 }

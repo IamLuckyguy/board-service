@@ -17,13 +17,13 @@ public enum ErrorCode {
 
     // 게시글 관련 에러
     POST_NOT_FOUND(HttpStatus.NOT_FOUND, "P001", "게시글을 찾을 수 없습니다"),
-    POST_ALREADY_DELETED(HttpStatus.BAD_REQUEST, "P002", "게시글이 이미 삭제되었습니다"),
+    POST_ALREADY_DELETED(HttpStatus.NOT_FOUND, "P002", "게시글이 이미 삭제되었습니다"),
     POST_STATUS_CHANGE_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "P003", "게시글 상태 변경을 허용하지 않습니다"),
     POST_UPDATE_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "P004", "게시글 수정을 허용하지 않습니다"),
 
     // 댓글 관련 에러
     COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "M001", "댓글을 찾을 수 없습니다"),
-    COMMENT_ALREADY_DELETED(HttpStatus.BAD_REQUEST, "M002", "댓글이 이미 삭제되었습니다"),
+    COMMENT_ALREADY_DELETED(HttpStatus.NOT_FOUND, "M002", "댓글이 이미 삭제되었습니다"),
     COMMENT_UPDATE_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "M003", "댓글 수정을 허용하지 않습니다"),
 
     // 좋아요 관련 에러

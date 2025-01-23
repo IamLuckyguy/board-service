@@ -1,7 +1,7 @@
 package kr.co.kwt.board.domain.comment;
 
-import kr.co.kwt.board.domain.comment.exception.CommentAlreadyDeletedException;
-import kr.co.kwt.board.domain.comment.exception.CommentUpdateNotAllowedException;
+import kr.co.kwt.board.domain.comment.exception.CommentDeleteException;
+import kr.co.kwt.board.domain.comment.exception.CommentUpdateException;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -40,7 +40,7 @@ public class Comment {
 
     public void updateContent(String content, Long updatedBy) {
         if (this.deletedAt != null) {
-            throw new CommentUpdateNotAllowedException(this.id);
+            throw new CommentUpdateException(this.id);
         }
         this.content = content;
         this.updatedBy = updatedBy;
@@ -49,7 +49,7 @@ public class Comment {
 
     public void delete(Long deletedBy) {
         if (this.deletedAt != null) {
-            throw new CommentAlreadyDeletedException(this.id);
+            throw new CommentDeleteException(this.id);
         }
         this.deletedAt = LocalDateTime.now();
         this.updatedBy = deletedBy;

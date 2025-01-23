@@ -5,9 +5,9 @@ import kr.co.kwt.board.domain.event.DomainEvent;
 import kr.co.kwt.board.domain.event.post.PostCreatedEvent;
 import kr.co.kwt.board.domain.event.post.PostDeletedEvent;
 import kr.co.kwt.board.domain.event.post.PostUpdatedEvent;
-import kr.co.kwt.board.domain.post.exception.PostCannotBeDeletedException;
-import kr.co.kwt.board.domain.post.exception.PostCannotBePublishedException;
-import kr.co.kwt.board.domain.post.exception.PostCannotBeUpdatedException;
+import kr.co.kwt.board.domain.post.exception.PostDeleteException;
+import kr.co.kwt.board.domain.post.exception.PostPublishException;
+import kr.co.kwt.board.domain.post.exception.PostUpdateException;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -113,31 +113,31 @@ public class Post {
 
     private void validateCanBePublished() {
         if (isDeleted()) {
-            throw new PostCannotBePublishedException(
+            throw new PostPublishException(
                     ErrorCode.POST_NOT_FOUND,
                     String.format(ErrorCode.POST_NOT_FOUND.getMessage() + " : %d", this.id)
             );
         }
 
         if (this.status != PostStatus.DRAFT && this.status != PostStatus.SCHEDULED) {
-            throw new PostCannotBePublishedException(
+            throw new PostPublishException(
                     ErrorCode.POST_STATUS_CHANGE_NOT_ALLOWED,
                     String.format(ErrorCode.POST_STATUS_CHANGE_NOT_ALLOWED.getMessage() + " : %s", this.status)
             );
         }
 
         if (this.postContent.getTitle() == null || this.postContent.getTitle().trim().isEmpty()) {
-            throw new PostCannotBePublishedException("제목이 없는 게시물은 발행할 수 없습니다.");
+            throw new PostPublishException("제목이 없는 게시물은 발행할 수 없습니다.");
         }
 
         if (this.postContent.getContent() == null || this.postContent.getContent().trim().isEmpty()) {
-            throw new PostCannotBePublishedException("내용이 없는 게시물은 발행할 수 없습니다.");
+            throw new PostPublishException("내용이 없는 게시물은 발행할 수 없습니다.");
         }
     }
 
     private void validateCanBeUpdated() {
         if (isDeleted()) {
-            throw new PostCannotBeUpdatedException(
+            throw new PostUpdateException(
                     ErrorCode.POST_NOT_FOUND,
                     String.format(ErrorCode.POST_NOT_FOUND.getMessage() + " : %d", this.id)
             );
@@ -146,7 +146,7 @@ public class Post {
 
     private void validateCanBeDeleted() {
         if (isDeleted()) {
-            throw new PostCannotBeDeletedException("이미 삭제된 게시물입니다.");
+            throw new PostDeleteException("이미 삭제된 게시물입니다.");
         }
     }
 
@@ -164,7 +164,7 @@ public class Post {
 
     public void schedule(LocalDateTime scheduledAt) {
         if (this.status != PostStatus.DRAFT) {
-            throw new PostCannotBePublishedException(
+            throw new PostPublishException(
                     ErrorCode.POST_STATUS_CHANGE_NOT_ALLOWED,
                     String.format(ErrorCode.POST_STATUS_CHANGE_NOT_ALLOWED.getMessage() + " : %s", this.status)
             );
