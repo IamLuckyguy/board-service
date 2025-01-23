@@ -6,9 +6,11 @@ import kr.co.kwt.board.application.port.out.like.LoadLikePort;
 import kr.co.kwt.board.application.port.out.like.SaveLikePort;
 import kr.co.kwt.board.application.port.out.post.LoadPostPort;
 import kr.co.kwt.board.domain.comment.Comment;
+import kr.co.kwt.board.domain.comment.exception.CommentNotFoundException;
 import kr.co.kwt.board.domain.like.Like;
 import kr.co.kwt.board.domain.like.LikeType;
 import kr.co.kwt.board.domain.post.Post;
+import kr.co.kwt.board.domain.post.exception.PostNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,11 +58,11 @@ public class LikeService implements ToggleLikeUseCase {
 
         if (type == LikeType.POST) {
             Post post = loadPostPort.findById(targetId)
-                    .orElseThrow(() -> new IllegalArgumentException("Post not found"));
+                    .orElseThrow(() -> new PostNotFoundException(targetId));
             post.updateLikeCount((int) likeCount);
         } else {
             Comment comment = loadCommentPort.findById(targetId)
-                    .orElseThrow(() -> new IllegalArgumentException("Comment not found"));
+                    .orElseThrow(() -> new CommentNotFoundException(targetId));
             comment.updateLikeCount((int) likeCount);
         }
     }

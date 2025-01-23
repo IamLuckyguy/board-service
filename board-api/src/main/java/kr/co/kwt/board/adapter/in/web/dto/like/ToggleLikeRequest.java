@@ -1,8 +1,8 @@
 package kr.co.kwt.board.adapter.in.web.dto.like;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
-import org.antlr.v4.runtime.misc.NotNull;
 
 @Getter
 @Builder

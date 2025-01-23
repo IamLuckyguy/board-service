@@ -1,10 +1,7 @@
 package kr.co.kwt.board.application.service;
 
-import kr.co.kwt.board.adapter.in.web.dto.comment.CommentResponse;
 import kr.co.kwt.board.adapter.out.api.member.MemberApiClient;
 import kr.co.kwt.board.adapter.out.api.member.dto.MemberResponse;
-import lombok.Builder;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;

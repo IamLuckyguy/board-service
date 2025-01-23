@@ -9,7 +9,9 @@ import java.util.Optional;
 
 public interface LoadPostPort {
     Optional<Post> findById(Long id);
+
     List<Post> loadAll();
+
     List<Post> findAllByCondition(
             Long serviceId,
             PostType postType,

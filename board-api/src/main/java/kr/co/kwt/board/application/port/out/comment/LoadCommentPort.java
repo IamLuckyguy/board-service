@@ -9,9 +9,14 @@ import java.util.Optional;
 
 public interface LoadCommentPort {
     Optional<Comment> findById(Long id);
+
     List<Comment> findByPostId(Long postId);
+
     List<Comment> findByParentId(Long id);
+
     Page<Comment> findParentCommentsByPostId(Long postId, Pageable pageable);
+
     List<Comment> findByParentIdIn(List<Long> parentIds);
+
     int countActiveCommentsByPostId(Long postId);
 }
