@@ -37,4 +37,12 @@ class LikePersistenceAdapter implements SaveLikePort, LoadLikePort {
     public long countByTargetIdAndType(Long targetId, LikeType type) {
         return likeRepository.countByTargetIdAndType(targetId, type);
     }
+
+    @Override
+    public Optional<Like> findByUserIdAndType(Long userId, LikeType likeType) {
+        return likeRepository.findByUserIdAndType(userId, likeType)
+                .stream()
+                .map(likeMapper::mapToDomainEntity)
+                .findFirst();
+    }
 }
