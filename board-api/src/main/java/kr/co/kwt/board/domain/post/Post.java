@@ -6,6 +6,7 @@ import kr.co.kwt.board.domain.event.post.PostCreatedEvent;
 import kr.co.kwt.board.domain.event.post.PostDeletedEvent;
 import kr.co.kwt.board.domain.event.post.PostUpdatedEvent;
 import kr.co.kwt.board.domain.post.exception.PostDeleteException;
+import kr.co.kwt.board.domain.post.exception.PostNotFoundException;
 import kr.co.kwt.board.domain.post.exception.PostPublishException;
 import kr.co.kwt.board.domain.post.exception.PostUpdateException;
 import lombok.Builder;
@@ -27,8 +28,6 @@ public class Post {
     private int viewCount;
     private int likeCount;
     private int commentCount;
-    private LocalDateTime scheduledAt;
-    private LocalDateTime publishedAt;
     private final LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime deletedAt;
@@ -38,8 +37,7 @@ public class Post {
 
     @Builder
     public Post(Long id, Long serviceId, Long authorId, String title, String content,
-                PostType postType, PostStatus status, boolean isPinned,
-                LocalDateTime scheduledAt, Long createdBy) {
+                PostType postType, PostStatus status, boolean isPinned, Long createdBy) {
         this.id = id;
         this.serviceId = serviceId;
         this.authorId = authorId;
@@ -47,7 +45,6 @@ public class Post {
         this.postType = postType;
         this.status = status;
         this.isPinned = isPinned;
-        this.scheduledAt = scheduledAt;
         this.createdAt = LocalDateTime.now();
         this.createdBy = createdBy;
         this.updatedBy = createdBy;
@@ -55,14 +52,13 @@ public class Post {
     }
 
     public void publish() {
-        validateCanBePublished();
-        this.status = PostStatus.PUBLISHED;
-        this.publishedAt = LocalDateTime.now();
+        validatePublish();
+        this.status = PostStatus.ACTIVE;
         domainEvents.add(new PostCreatedEvent(this));
     }
 
     public void updateContent(String title, String content, Long updatedBy) {
-        validateCanBeUpdated();
+        validateUpdate(updatedBy);
         this.postContent = PostContent.of(title, content);
         this.updatedBy = updatedBy;
         this.updatedAt = LocalDateTime.now();
@@ -70,7 +66,7 @@ public class Post {
     }
 
     public void delete() {
-        validateCanBeDeleted();
+        validateDelete();
         this.status = PostStatus.DELETED;
         this.deletedAt = LocalDateTime.now();
         domainEvents.add(new PostDeletedEvent(this));
@@ -103,48 +99,32 @@ public class Post {
 
     public void updateLikeCount(int likeCount) {
         if (isDeleted()) {
-            throw new IllegalStateException("Cannot update like count of deleted post");
+            throw new PostNotFoundException(this.id);
         }
         if (likeCount < 0) {
-            throw new IllegalArgumentException("Like count cannot be negative");
+            throw new PostUpdateException(ErrorCode.POST_UPDATE_NOT_ALLOWED, "좋아요 수는 음수가 될 수 없습니다.");
         }
         this.likeCount = likeCount;
     }
 
-    private void validateCanBePublished() {
-        if (isDeleted()) {
-            throw new PostPublishException(
-                    ErrorCode.POST_NOT_FOUND,
-                    String.format(ErrorCode.POST_NOT_FOUND.getMessage() + " : %d", this.id)
-            );
-        }
+    private void validatePublish() {
 
-        if (this.status != PostStatus.DRAFT && this.status != PostStatus.SCHEDULED) {
-            throw new PostPublishException(
-                    ErrorCode.POST_STATUS_CHANGE_NOT_ALLOWED,
-                    String.format(ErrorCode.POST_STATUS_CHANGE_NOT_ALLOWED.getMessage() + " : %s", this.status)
-            );
-        }
-
-        if (this.postContent.getTitle() == null || this.postContent.getTitle().trim().isEmpty()) {
-            throw new PostPublishException("제목이 없는 게시물은 발행할 수 없습니다.");
-        }
-
-        if (this.postContent.getContent() == null || this.postContent.getContent().trim().isEmpty()) {
-            throw new PostPublishException("내용이 없는 게시물은 발행할 수 없습니다.");
-        }
     }
 
-    private void validateCanBeUpdated() {
+    private void validateUpdate(Long updatedBy) {
         if (isDeleted()) {
             throw new PostUpdateException(
                     ErrorCode.POST_NOT_FOUND,
                     String.format(ErrorCode.POST_NOT_FOUND.getMessage() + " : %d", this.id)
             );
         }
+
+        if (!this.authorId.equals(updatedBy)) {
+            throw new PostUpdateException("게시글은 작성자만 수정할 수 있습니다.");
+        }
     }
 
-    private void validateCanBeDeleted() {
+    private void validateDelete() {
         if (isDeleted()) {
             throw new PostDeleteException("이미 삭제된 게시물입니다.");
         }
@@ -162,17 +142,6 @@ public class Post {
         return this.postContent.getContent();
     }
 
-    public void schedule(LocalDateTime scheduledAt) {
-        if (this.status != PostStatus.DRAFT) {
-            throw new PostPublishException(
-                    ErrorCode.POST_STATUS_CHANGE_NOT_ALLOWED,
-                    String.format(ErrorCode.POST_STATUS_CHANGE_NOT_ALLOWED.getMessage() + " : %s", this.status)
-            );
-        }
-        this.status = PostStatus.SCHEDULED;
-        this.scheduledAt = scheduledAt;
-    }
-
     public void updatePinnedStatus(boolean pinned) {
         this.isPinned = pinned;
     }
@@ -182,5 +151,11 @@ public class Post {
             this.commentCount = actualCommentCount;
 //            domainEvents.add(new CommentCountSyncedEvent(this));  // 필요한 경우
         }
+    }
+
+    public List<DomainEvent> publishAndClearEvents() {
+        List<DomainEvent> events = getDomainEvents();
+        clearDomainEvents();
+        return events;
     }
 }

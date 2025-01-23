@@ -1,5 +1,6 @@
 package kr.co.kwt.board.common.exception;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,11 +15,21 @@ import java.util.stream.Collectors;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Schema(description = "API 에러 응답")
 public class ErrorResponse {
+    @Schema(description = "에러 발생 시간")
     private LocalDateTime timestamp;
+
+    @Schema(description = "에러 코드")
     private String code;
+
+    @Schema(description = "에러 메시지")
     private String message;
+
+    @Schema(description = "상세 에러 정보")
     private List<FieldError> errors;
+
+    @Schema(description = "에러 발생 경로")
     @Setter
     private String path;
 

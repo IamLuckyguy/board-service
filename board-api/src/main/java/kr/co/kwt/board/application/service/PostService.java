@@ -14,13 +14,12 @@ import kr.co.kwt.board.domain.comment.Comment;
 import kr.co.kwt.board.domain.like.Like;
 import kr.co.kwt.board.domain.like.LikeType;
 import kr.co.kwt.board.domain.post.Post;
-import kr.co.kwt.board.domain.post.PostStatus;
 import kr.co.kwt.board.domain.post.exception.PostNotFoundException;
+import kr.co.kwt.board.domain.post.exception.PostUpdateException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -38,7 +37,7 @@ public class PostService implements CreatePostUseCase, UpdatePostUseCase, Delete
     @Transactional
     public PostDetails getPost(Long postId, Long userId) {
         Post post = loadPostPort.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("Post not found"));
+                .orElseThrow(() -> new PostNotFoundException(postId));
 
         // 조회수 증가
         post.incrementViewCount();
@@ -173,25 +172,14 @@ public class PostService implements CreatePostUseCase, UpdatePostUseCase, Delete
                 .title(command.getTitle())
                 .content(command.getContent())
                 .postType(command.getPostType())
-                .status(PostStatus.DRAFT)
                 .isPinned(command.isPinned())
-                .scheduledAt(command.getScheduledAt())
                 .createdBy(command.getCreatedBy())
                 .build();
 
+        post.publish();
         Post savedPost = savePostPort.save(post);
         publishEvents(post);
         return savedPost.getId();
-    }
-
-    @Transactional
-    public void schedulePost(Long postId, LocalDateTime scheduledAt) {
-        Post post = loadPostPort.findById(postId)
-                .orElseThrow(() -> new PostNotFoundException(postId));
-
-        post.schedule(scheduledAt);
-        savePostPort.save(post);
-        publishEvents(post);
     }
 
     @Override
@@ -200,7 +188,7 @@ public class PostService implements CreatePostUseCase, UpdatePostUseCase, Delete
         Post post = loadPostPort.findById(command.getPostId())
                 .orElseThrow(() -> new PostNotFoundException(command.getPostId()));
 
-        // Update post content
+        // 게시글 제목, 내용, 수정자 정보 업데이트
         post.updateContent(
                 command.getTitle(),
                 command.getContent(),
@@ -209,11 +197,6 @@ public class PostService implements CreatePostUseCase, UpdatePostUseCase, Delete
 
         // Update pinned status if changed
         post.updatePinnedStatus(command.isPinned());
-
-        // Update scheduled time if provided
-        if (command.getScheduledAt() != null) {
-            post.schedule(command.getScheduledAt());
-        }
 
         savePostPort.save(post);
         publishEvents(post);
@@ -231,7 +214,6 @@ public class PostService implements CreatePostUseCase, UpdatePostUseCase, Delete
     }
 
     private void publishEvents(Post post) {
-        post.getDomainEvents().forEach(eventPublisher::publish);
-        post.clearDomainEvents();  // 발행된 이벤트 클리어
+        post.publishAndClearEvents().forEach(eventPublisher::publish);
     }
 }

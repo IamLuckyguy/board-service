@@ -7,3 +7,8 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+kms:
+  apiKey: 151d46d135758e112dbf8674f32c062726bcddd6e5e944ea57fdea39a6932205
+  url: https://kms.kwt.co.kr/api/secrets
+  secretKey: DB_BOARD_READ

@@ -18,8 +18,6 @@ public class PostMapper {
                 .viewCount(post.getViewCount())
                 .likeCount(post.getLikeCount())
                 .commentCount(post.getCommentCount())
-                .scheduledAt(post.getScheduledAt())
-                .publishedAt(post.getPublishedAt())
                 .createdAt(post.getCreatedAt())
                 .updatedAt(post.getUpdatedAt())
                 .deletedAt(post.getDeletedAt())
@@ -38,7 +36,6 @@ public class PostMapper {
                 .postType(entity.getPostType())
                 .status(entity.getStatus())
                 .isPinned(entity.isPinned())
-                .scheduledAt(entity.getScheduledAt())
                 .createdBy(entity.getCreatedBy())
                 .build();
     }

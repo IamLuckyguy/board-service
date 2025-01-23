@@ -53,12 +53,6 @@ public class PostJpaEntity {
     @Column(name = "comment_count")
     private int commentCount;
 
-    @Column(name = "scheduled_at")
-    private LocalDateTime scheduledAt;
-
-    @Column(name = "published_at")
-    private LocalDateTime publishedAt;
-
     @CreatedDate
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -79,8 +73,8 @@ public class PostJpaEntity {
     @Builder
     public PostJpaEntity(Long id, Long serviceId, Long authorId, String title, String content, PostType postType,
                          PostStatus status, boolean isPinned, int viewCount, int likeCount, int commentCount,
-                         LocalDateTime scheduledAt, LocalDateTime publishedAt, LocalDateTime createdAt,
-                         LocalDateTime updatedAt, LocalDateTime deletedAt, Long createdBy, Long updatedBy) {
+                         LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime deletedAt, Long createdBy,
+                         Long updatedBy) {
         this.id = id;
         this.serviceId = serviceId;
         this.authorId = authorId;
@@ -92,27 +86,10 @@ public class PostJpaEntity {
         this.viewCount = viewCount;
         this.likeCount = likeCount;
         this.commentCount = commentCount;
-        this.scheduledAt = scheduledAt;
-        this.publishedAt = publishedAt;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.deletedAt = deletedAt;
         this.createdBy = createdBy;
         this.updatedBy = updatedBy;
-    }
-
-    public void incrementViewCount() {
-        this.viewCount++;
-    }
-
-    public void updateLikeCount(int likeCount) {
-        this.likeCount = likeCount;
-    }
-
-    public void updateContent(String title, String content, Long updatedBy) {
-        this.title = title;
-        this.content = content;
-        this.updatedBy = updatedBy;
-        this.updatedAt = LocalDateTime.now();
     }
 }

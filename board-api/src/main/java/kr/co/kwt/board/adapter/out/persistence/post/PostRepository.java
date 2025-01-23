@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface PostRepository extends JpaRepository<PostJpaEntity, Long> {
     @Query("SELECT p FROM PostJpaEntity p WHERE " +
@@ -26,9 +25,4 @@ public interface PostRepository extends JpaRepository<PostJpaEntity, Long> {
             @Param("isPinned") Boolean isPinned,
             Pageable pageable
     );
-
-    @Query("SELECT DISTINCT p FROM PostJpaEntity p " +
-            "LEFT JOIN FETCH p.comments " +
-            "WHERE p.id = :id")
-    Optional<PostJpaEntity> findByIdWithComments(@Param("id") Long id);
 }

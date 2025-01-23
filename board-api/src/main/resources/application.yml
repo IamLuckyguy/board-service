@@ -1,3 +1,12 @@
 spring:
   application:
     name: board-api
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /api-docs
+  packages-to-scan: kr.co.kwt.board
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json

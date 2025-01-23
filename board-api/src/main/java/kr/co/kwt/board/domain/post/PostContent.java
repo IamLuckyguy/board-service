@@ -1,5 +1,6 @@
 package kr.co.kwt.board.domain.post;
 
+import kr.co.kwt.board.domain.post.exception.PostPublishException;
 import lombok.Value;
 
 @Value
@@ -8,8 +9,7 @@ public class PostContent {
     String content;
 
     private PostContent(String title, String content) {
-        validateTitle(title);
-        validateContent(content);
+        validate(title, content);
         this.title = title;
         this.content = content;
     }
@@ -18,18 +18,15 @@ public class PostContent {
         return new PostContent(title, content);
     }
 
-    private void validateTitle(String title) {
+    private static void validate(String title, String content) {
         if (title == null || title.trim().isEmpty()) {
-            throw new IllegalArgumentException("제목을 입력해주세요.");
+            throw new PostPublishException("제목을 입력해주세요.");
         }
         if (title.length() > 255) {
-            throw new IllegalArgumentException("Title cannot be longer than 255 characters");
+            throw new PostPublishException("제목은 255자를 초과할 수 없습니다.");
         }
-    }
-
-    private void validateContent(String content) {
         if (content == null || content.trim().isEmpty()) {
-            throw new IllegalArgumentException("Content cannot be empty");
+            throw new PostPublishException("내용을 입력해주세요.");
         }
     }
 }
