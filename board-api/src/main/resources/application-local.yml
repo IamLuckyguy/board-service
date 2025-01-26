@@ -1,14 +1,40 @@
 spring:
+  config:
+    activate:
+      on-profile: local
   kafka:
-    bootstrap-servers: kafka-controller-headless.kafka.svc.cluster.local:9092
+    bootstrap-servers: 192.168.100.201:9094,192.168.100.202:9094,192.168.100.203:9094
     consumer:
       group-id: board-api
       auto-offset-reset: earliest
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    compression-type: zstd
+    security:
+      protocol: SASL_PLAINTEXT
+    sasl:
+      mechanism: SCRAM-SHA-512
+      jaas:
+        config: org.apache.kafka.common.security.scram.ScramLoginModule required username="user1" password="Jkco2eqlPx";
+    topic:
+      post:
+        created: dev.board-service.post.created
+        updated: dev.board-service.post.updated
+        deleted: dev.board-service.post.deleted
+      comment:
+        created: dev.board-service.comment.created
+      like:
+        added: dev.board-service.like.added
 
 kms:
   apiKey: 151d46d135758e112dbf8674f32c062726bcddd6e5e944ea57fdea39a6932205
   url: https://kms.kwt.co.kr/api/secrets
   secretKey: DB_BOARD_READ
+
+api:
+  member:
+    api-key: 151d46d135758e112dbf8674f32c062726bcddd6e5e944ea57fdea39a6932205
+    base-url: https://member-dev.kwt.co.kr/api/members
+    connect-timeout: 3000
+    read-timeout: 3000

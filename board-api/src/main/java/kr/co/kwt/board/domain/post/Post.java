@@ -7,7 +7,6 @@ import kr.co.kwt.board.domain.event.post.PostDeletedEvent;
 import kr.co.kwt.board.domain.event.post.PostUpdatedEvent;
 import kr.co.kwt.board.domain.post.exception.PostDeleteException;
 import kr.co.kwt.board.domain.post.exception.PostNotFoundException;
-import kr.co.kwt.board.domain.post.exception.PostPublishException;
 import kr.co.kwt.board.domain.post.exception.PostUpdateException;
 import lombok.Builder;
 import lombok.Getter;
@@ -54,6 +53,7 @@ public class Post {
     public void publish() {
         validatePublish();
         this.status = PostStatus.ACTIVE;
+        this.updatedAt = LocalDateTime.now();
         domainEvents.add(new PostCreatedEvent(this));
     }
 

@@ -1,4 +1,7 @@
 spring:
+  config:
+    activate:
+      on-profile: dev
   kafka:
     bootstrap-servers: kafka-controller-headless.kafka.svc.cluster.local:9092
     consumer:
@@ -7,3 +10,12 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    topic:
+      post:
+        created: dev.board-service.post.created
+        updated: dev.board-service.post.updated
+        deleted: dev.board-service.post.deleted
+      comment:
+        created: dev.board-service.comment.created
+      like:
+        added: dev.board-service.like.added

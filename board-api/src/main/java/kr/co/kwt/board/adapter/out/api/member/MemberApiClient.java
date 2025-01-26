@@ -21,34 +21,62 @@ public class MemberApiClient {
     private final MemberApiConfig memberApiConfig;
 
     public MemberResponse getMember(Long memberId) {
-        String url = UriComponentsBuilder
-                .fromHttpUrl(memberApiConfig.getBaseUrl())
-                .path("/api/v1/members/{memberId}")
-                .buildAndExpand(memberId)
-                .toUriString();
+//        String url = UriComponentsBuilder
+//                .fromHttpUrl(memberApiConfig.getBaseUrl())
+//                .path("/api/v1/members/{memberId}")
+//                .buildAndExpand(memberId)
+//                .toUriString();
+//
+//        return memberApiRestTemplate.exchange(
+//                url,
+//                HttpMethod.GET,
+//                new HttpEntity<>(createHeaders()),
+//                MemberResponse.class
+//        ).getBody();
 
-        return memberApiRestTemplate.exchange(
-                url,
-                HttpMethod.GET,
-                new HttpEntity<>(createHeaders()),
-                MemberResponse.class
-        ).getBody();
+        return MemberResponse.builder()
+                .memberId(1L)
+                .type("USER")
+                .status("ACTIVE")
+                .role("USER")
+                .email("lucky@kwt.co.kr")
+                .nickname("test")
+                .build();
     }
 
     public List<MemberResponse> getMembers(Set<Long> memberIds) {
-        String url = UriComponentsBuilder
-                .fromHttpUrl(memberApiConfig.getBaseUrl())
-                .path("/api/v1/members")
-                .queryParam("memberIds", memberIds)
-                .build()
-                .toUriString();
+//        String url = UriComponentsBuilder
+//                .fromHttpUrl(memberApiConfig.getBaseUrl())
+//                .path("/api/v1/members")
+//                .queryParam("memberIds", memberIds)
+//                .build()
+//                .toUriString();
+//
+//        return memberApiRestTemplate.exchange(
+//                url,
+//                HttpMethod.GET,
+//                new HttpEntity<>(createHeaders()),
+//                MemberListResponse.class
+//        ).getBody().getMembers();
 
-        return memberApiRestTemplate.exchange(
-                url,
-                HttpMethod.GET,
-                new HttpEntity<>(createHeaders()),
-                MemberListResponse.class
-        ).getBody().getMembers();
+            return List.of(
+                    MemberResponse.builder()
+                            .memberId(1L)
+                            .type("USER")
+                            .status("ACTIVE")
+                            .role("USER")
+                            .email("lucky@kwt.co.kr")
+                            .nickname("test")
+                            .build(),
+                    MemberResponse.builder()
+                            .memberId(2L)
+                            .type("USER")
+                            .status("ACTIVE")
+                            .role("USER")
+                            .email("lucky2@kwt.co.kr")
+                            .nickname("test2")
+                            .build()
+            );
     }
 
     private HttpHeaders createHeaders() {

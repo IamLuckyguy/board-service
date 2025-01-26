@@ -6,7 +6,7 @@ import kr.co.kwt.board.application.port.in.post.DeletePostUseCase;
 import kr.co.kwt.board.application.port.in.post.GetPostUseCase;
 import kr.co.kwt.board.application.port.in.post.UpdatePostUseCase;
 import kr.co.kwt.board.application.port.out.comment.LoadCommentPort;
-import kr.co.kwt.board.application.port.out.event.EventPublisher;
+import kr.co.kwt.board.application.port.out.event.EventPublisherPort;
 import kr.co.kwt.board.application.port.out.like.LoadLikePort;
 import kr.co.kwt.board.application.port.out.post.LoadPostPort;
 import kr.co.kwt.board.application.port.out.post.SavePostPort;
@@ -15,7 +15,6 @@ import kr.co.kwt.board.domain.like.Like;
 import kr.co.kwt.board.domain.like.LikeType;
 import kr.co.kwt.board.domain.post.Post;
 import kr.co.kwt.board.domain.post.exception.PostNotFoundException;
-import kr.co.kwt.board.domain.post.exception.PostUpdateException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,7 +29,7 @@ public class PostService implements CreatePostUseCase, UpdatePostUseCase, Delete
     private final LoadPostPort loadPostPort;
     private final LoadCommentPort loadCommentPort;
     private final LoadLikePort loadLikePort;
-    private final EventPublisher eventPublisher;
+    private final EventPublisherPort eventPublisherPort;
     private final AuthorService authorService; // 작성자 정보 조회 서비스
 
     @Override
@@ -214,6 +213,6 @@ public class PostService implements CreatePostUseCase, UpdatePostUseCase, Delete
     }
 
     private void publishEvents(Post post) {
-        post.publishAndClearEvents().forEach(eventPublisher::publish);
+        post.publishAndClearEvents().forEach(eventPublisherPort::publish);
     }
 }
